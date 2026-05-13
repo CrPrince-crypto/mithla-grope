@@ -35,6 +35,8 @@ const members = [
   { name: 'Umar Farooq', village: 'Madhubani' },
 ];
 
+const villages = ['All Villages', ...new Set(members.map((member) => member.village))];
+
 const stats = [
   { label: 'Total Members', value: '31', icon: '👥', tone: 'blue' },
   { label: 'Monthly Contribution per Member', value: '₹1000', icon: '₹', tone: 'violet' },
@@ -143,22 +145,125 @@ function galleryCard(image, index) {
   `;
 }
 
-function render() {
-  const doubledMembers = [...members, ...members];
-  const heroImage = imageUrl(culturalImages[0], 1600);
-  const storyImage = imageUrl(culturalImages[1], 1400);
 
-  document.body.insertAdjacentHTML('afterbegin', '<div class="cursor-glow" aria-hidden="true"></div><div class="cursor-trail" aria-hidden="true"></div>');
-  document.querySelector('.background-orbs').innerHTML = Array.from({ length: 26 }, (_, index) => (
-    `<span class="particle" style="--x:${(index * 17) % 96}%;--y:${8 + ((index * 29) % 84)}%;--delay:${index * 0.38}s"></span>`
-  )).join('');
-
-  document.querySelector('#top').innerHTML = `
+function developerCredit() {
+  return `
     <div class="developer-credit reveal visible" aria-label="Developer credit">
       <span class="credit-orb" aria-hidden="true"></span>
       <p>Developed by <strong>Ghanshyam Roy</strong></p>
       <span class="credit-spark" aria-hidden="true">✦</span>
     </div>
+  `;
+}
+
+function memberDirectoryCard(member, index) {
+  const isFounder = index === 0;
+  return `
+    <article class="directory-card glass-card reveal ${isFounder ? 'founder-directory-card' : ''}" data-name="${member.name.toLowerCase()}" data-village="${member.village}" style="--delay:${(index % 12) * 0.035}s">
+      <div class="directory-card-top">
+        <div class="directory-avatar">${isFounder ? '♛' : member.name.charAt(0)}</div>
+        <span class="status"><i></i> Active</span>
+      </div>
+      <div class="directory-member-copy">
+        <p class="member-index">Member ${String(index + 1).padStart(2, '0')}</p>
+        <h3>${member.name}</h3>
+        <p>${member.village}</p>
+      </div>
+      <div class="directory-contribution">
+        <span>Monthly contribution</span>
+        <strong>₹1000</strong>
+      </div>
+      ${isFounder ? '<div class="founder-ribbon">Founder</div>' : ''}
+    </article>
+  `;
+}
+
+function renderMembersPage() {
+  const heroImage = imageUrl(culturalImages[4], 1600);
+  const founder = members[0];
+
+  document.title = 'Mithila Society Members';
+  document.querySelector('#top').innerHTML = `
+    ${developerCredit()}
+
+    <header class="members-page-hero" style="--members-hero-art:url('${heroImage}')">
+      <a class="back-home magnetic" href="/">← Back to Home</a>
+      <div class="members-hero-panel glass-card reveal visible">
+        <p class="trust-pill">${icon('👥', 'Premium member directory')}</p>
+        <h1><span>Mithila Society</span> Members</h1>
+        <p class="subtitle">Together We Save, Together We Grow</p>
+        <div class="members-hero-stats">
+          <span><b>${members.length}</b> active members</span>
+          <span><b>₹1000</b> per member</span>
+          <span><b>₹31,000</b> monthly total</span>
+        </div>
+      </div>
+    </header>
+
+    ${divider('Founder')}
+
+    <section class="section members-founder-section reveal">
+      <article class="members-founder-card glass-card">
+        <div class="founder-crown">♛</div>
+        <div>
+          <p class="overline">Founder Highlight</p>
+          <h2>${founder.name}</h2>
+          <p>Founder of Mithila Society Group, representing trust, discipline, and a premium community savings culture.</p>
+        </div>
+        <span class="founder-badge">Founder</span>
+      </article>
+    </section>
+
+    ${divider('Search & Filter')}
+
+    <section class="section members-directory-section reveal">
+      <div class="member-controls glass-card">
+        <label class="search-field" for="member-search">
+          <span>Search member</span>
+          <input id="member-search" type="search" placeholder="Search by name..." autocomplete="off" />
+        </label>
+        <label class="filter-field" for="village-filter">
+          <span>Filter village</span>
+          <select id="village-filter">
+            ${villages.map((village) => `<option value="${village}">${village}</option>`).join('')}
+          </select>
+        </label>
+        <div class="result-pill" aria-live="polite"><strong id="member-result-count">${members.length}</strong> members found</div>
+      </div>
+
+      <div id="members-grid" class="members-grid">
+        ${members.map(memberDirectoryCard).join('')}
+      </div>
+      <p id="empty-members" class="empty-members glass-card" hidden>No members found. Try another name or village.</p>
+    </section>
+
+    <section class="members-bottom section reveal">
+      <div class="members-bottom-card glass-card">
+        <div>
+          <span>Total Members</span>
+          <strong>${members.length}</strong>
+        </div>
+        <div>
+          <span>Monthly Total Contribution</span>
+          <strong>₹31,000</strong>
+        </div>
+        <div>
+          <span>Developed by</span>
+          <strong>Ghanshyam Roy</strong>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderHome() {
+  const doubledMembers = [...members, ...members];
+  const heroImage = imageUrl(culturalImages[0], 1600);
+  const storyImage = imageUrl(culturalImages[1], 1400);
+
+
+  document.querySelector('#top').innerHTML = `
+    ${developerCredit()}
 
     <header class="hero" style="--hero-art:url('${heroImage}')">
       <span class="light-streak streak-one" aria-hidden="true"></span>
@@ -174,6 +279,7 @@ function render() {
           <p class="subtitle">Together We Save, Together We Grow — a premium savings circle inspired by trust, culture, and community pride.</p>
           <div class="hero-actions">
             <a class="btn primary magnetic" href="#members">Join Group <span>→</span></a>
+            <a class="btn ghost magnetic" href="/members">View All Members</a>
             <a class="btn ghost magnetic" href="#dashboard">Member Login</a>
           </div>
           <div class="hero-metrics" aria-label="Community highlights">
@@ -303,7 +409,7 @@ function render() {
         </div>
         <nav aria-label="Social links">
           <a class="magnetic" href="#top">✉</a>
-          <a class="magnetic" href="#members">👥</a>
+          <a class="magnetic" href="/members">👥</a>
           <a class="magnetic" href="#dashboard">✦</a>
         </nav>
       </div>
@@ -375,6 +481,60 @@ function attachInteractiveLighting() {
   });
 }
 
-render();
+
+function prepareAtmosphere() {
+  if (!document.querySelector('.cursor-glow')) {
+    document.body.insertAdjacentHTML('afterbegin', '<div class="cursor-glow" aria-hidden="true"></div><div class="cursor-trail" aria-hidden="true"></div>');
+  }
+
+  document.querySelector('.background-orbs').innerHTML = Array.from({ length: 26 }, (_, index) => (
+    `<span class="particle" style="--x:${(index * 17) % 96}%;--y:${8 + ((index * 29) % 84)}%;--delay:${index * 0.38}s"></span>`
+  )).join('');
+}
+
+function bindMemberFilters() {
+  const search = document.querySelector('#member-search');
+  const village = document.querySelector('#village-filter');
+  const cards = [...document.querySelectorAll('.directory-card')];
+  const resultCount = document.querySelector('#member-result-count');
+  const emptyState = document.querySelector('#empty-members');
+
+  if (!search || !village) return;
+
+  const applyFilters = () => {
+    const term = search.value.trim().toLowerCase();
+    const selectedVillage = village.value;
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const matchesName = card.dataset.name.includes(term);
+      const matchesVillage = selectedVillage === 'All Villages' || card.dataset.village === selectedVillage;
+      const isVisible = matchesName && matchesVillage;
+      card.hidden = !isVisible;
+      card.classList.toggle('filtered-in', isVisible);
+      if (isVisible) visibleCount += 1;
+    });
+
+    resultCount.textContent = visibleCount;
+    emptyState.hidden = visibleCount !== 0;
+  };
+
+  search.addEventListener('input', applyFilters);
+  village.addEventListener('change', applyFilters);
+  applyFilters();
+}
+
+function renderRoute() {
+  if (window.location.pathname.replace(/\/$/, '') === '/members') {
+    renderMembersPage();
+    bindMemberFilters();
+  } else {
+    document.title = 'Mithila Society Group';
+    renderHome();
+  }
+}
+
+prepareAtmosphere();
+renderRoute();
 revealOnScroll();
 attachInteractiveLighting();
